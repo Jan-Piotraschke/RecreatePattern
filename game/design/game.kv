@@ -1,16 +1,19 @@
 <GameScreen>:
+    on_release: app.game.GameGrid(size_hint_min_y=620)
+
     BoxLayout:
         orientation: 'vertical'
-        size_hint_max_y: 40
-
-        padding: (200, 100, 200, 150)
-        spacing: 12
 
         Button:
             pos_hint: {'center_x': 0.5}
             text: 'Back to menu'
             on_press: root.back()
 
-        # footer.add_widget(Button(text="Restart", on_press=self.restart))
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_max_y: 40
+        Button:
+            text: "Back to menu"
+            on_press: root.back()
 
-        layout = BoxLayout(orientation="vertical")
+
