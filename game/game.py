@@ -19,8 +19,8 @@ from kivy.lang import Builder
 # our .kv design file 
 # Builder.load_file('design/game.kv')
 
-LightOut = os.path.join("img", "down.png")
-LightNormal = os.path.join("img", "up.png")
+lightOut = os.path.join("img", "down.png")
+lightNormal = os.path.join("img", "up.png")
 
 
 class GameScreen(Screen):
@@ -29,53 +29,54 @@ class GameScreen(Screen):
 
         self.game = GameGrid(size_hint_min_y=620)
 
-        box = BoxLayout(orientation="vertical")
-        box.add_widget(self.game)
+        # create the play ground for the game
+        playGround = BoxLayout(orientation="vertical")
+        playGround.add_widget(self.game)
 
-        footer = BoxLayout(orientation="horizontal", size_hint_max_y=40)
-        # footer.add_widget(Button(text="Restart", on_press=self.restart))
-        footer.add_widget(Button(text="Back to menu", on_press=self.back))
+        # create the navigation bar
+        navigationBar = BoxLayout(orientation="horizontal", size_hint_max_y=40)
+        # navigationBar.add_widget(Button(text="Restart", on_press=self.restart))
+        navigationBar.add_widget(Button(text="Back to menu", on_press=self.back))
 
         layout = BoxLayout(orientation="vertical")
-        layout.add_widget(box)
-
-        layout.add_widget(footer)
+        layout.add_widget(playGround)
+        layout.add_widget(navigationBar)
 
         self.add_widget(layout)
 
+    # go back to the menu
     def back(self, btn):
         self.parent.transition.direction = "right"
         self.parent.current = "menu"
 
 
 # in this class we define the visualization logic at which time the light is off or on
-class LightGradient(Button):
-    def __init__(self, up, id, **kwargs):
-        super(LightGradient, self).__init__(**kwargs)
+class Light(Button):
+    def __init__(self, waveLength, id, **kwargs):
+        super(Light, self).__init__(**kwargs)
         
         self.toggled = 0
-        self.always_release = True
-        self.initialize(up)
+        self.initialize(waveLength)
 
-    def initialize(self, up):
-        if up:
+    def initialize(self, waveLength):
+        if waveLength==1:
             self.toggled = 1
-            self.background_down = LightOut
-            self.background_normal = LightNormal
+            self.background_down = lightOut
+            self.background_normal = lightNormal
         else:
             self.toggled = 0
-            self.background_down = LightNormal
-            self.background_normal = LightOut
+            self.background_down = lightNormal
+            self.background_normal = lightOut
 
-    def flip(self):
-        self.toggled = 0 if self.toggled else 1
-        self.background_normal, self.background_down = self.background_down, self.background_normal
+    # def flip(self):
+    #     self.toggled = 0 if self.toggled else 1
+    #     self.background_normal, self.background_down = self.background_down, self.background_normal
 
-    def restore(self):
-        if self.toggled:
-            self.background_normal = LightNormal
-        else:
-            self.background_normal = LightOut
+    # def restore(self):
+    #     if self.toggled:
+    #         self.background_normal = lightNormal
+    #     else:
+    #         self.background_normal = lightOut
 
 
 def dot(x1, x2):
@@ -104,7 +105,10 @@ class Game:
 class GameGrid(GridLayout):
     def __init__(self, **kwargs):
         super().__init__()
+
+        # ! important to know: 'self.cols' is mandatory for 'GridLayout'
         self.cols = 5
+        # the space between the fields
         self.spacing = 5
 
         self.game = Game()
@@ -121,9 +125,9 @@ class GameGrid(GridLayout):
 
         self.game.load()
 
-        self.lights = []
+        self.lightsValue = []
         for i in range(25):
             
             # overgive the value of the lights (on vs off) to the visualization logic class
-            self.lights.append(LightGradient(self.game.config[i], id=str(i)))#, on_press=self.toggle))
-            self.add_widget(self.lights[i])
+            self.lightsValue.append(Light(self.game.config[i], id=str(i)))#, on_press=self.toggle))
+            self.add_widget(self.lightsValue[i])

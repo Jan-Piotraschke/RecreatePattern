@@ -7,7 +7,6 @@ from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
 
-
 from menu import MenuScreen
 from game import GameScreen
 
