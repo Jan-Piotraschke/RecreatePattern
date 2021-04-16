@@ -19,8 +19,8 @@ from kivy.lang import Builder
 # our .kv design file 
 # Builder.load_file('design/game.kv')
 
-lightOut = os.path.join("img", "down.png")
-lightNormal = os.path.join("img", "up.png")
+lightOut = os.path.join("img", "orange.png")
+lightNormal = os.path.join("img", "red.png")
 
 
 class GameScreen(Screen):
