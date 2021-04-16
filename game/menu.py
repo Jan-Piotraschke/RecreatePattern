@@ -6,7 +6,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 
 # our .kv design file 
-Builder.load_file('menu.kv')
+Builder.load_file('design/menu.kv')
 
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
