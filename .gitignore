@@ -76,7 +76,7 @@ kivy/core/window/_window_sdl2.c
 .settings/
 
 # Virtualenv
-kivy_venv
+venv
 
 # Emacs
 .projectile
