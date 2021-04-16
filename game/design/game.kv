@@ -1,7 +1,16 @@
 <GameScreen>:
     BoxLayout:
         orientation: 'vertical'
-        size: root.width, root.height
+        size_hint_max_y: 40
 
         padding: (200, 100, 200, 150)
         spacing: 12
+
+        Button:
+            pos_hint: {'center_x': 0.5}
+            text: 'Back to menu'
+            on_press: root.back()
+
+        # footer.add_widget(Button(text="Restart", on_press=self.restart))
+
+        layout = BoxLayout(orientation="vertical")
