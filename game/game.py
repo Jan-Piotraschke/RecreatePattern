@@ -68,15 +68,10 @@ class Light(Button):
             self.background_down = lightNormal
             self.background_normal = lightOut
 
-    # def flip(self):
-    #     self.toggled = 0 if self.toggled else 1
-    #     self.background_normal, self.background_down = self.background_down, self.background_normal
-
-    # def restore(self):
-    #     if self.toggled:
-    #         self.background_normal = lightNormal
-    #     else:
-    #         self.background_normal = lightOut
+    # ! function is broken
+    def flip(self):
+        self.toggled = 0 if self.toggled else 1
+        self.background_normal, self.background_down = self.background_down, self.background_normal
 
 
 def dot(x1, x2):
@@ -112,16 +107,14 @@ class GameGrid(GridLayout):
         self.spacing = 5
 
         self.game = Game()
-        # self.moves = Moves()
         # self.manager = None
         # self.player_name = None
         # self.scheduled = None
-        # self.toggled_last = None
 
         with self.canvas.before:
             Color(0.75, 0.75, 0.75, 0.75)
             self.rect = Rectangle(size=self.size, pos=self.pos)
-        # self.bind(pos=self.update_rect, size=self.update_rect)
+        self.bind(pos=self.update_rect, size=self.update_rect)
 
         self.game.load()
 
@@ -129,5 +122,25 @@ class GameGrid(GridLayout):
         for i in range(25):
             
             # overgive the value of the lights (on vs off) to the visualization logic class
-            self.lightsValue.append(Light(self.game.config[i], id=str(i)))#, on_press=self.toggle))
+            self.lightsValue.append(Light(self.game.config[i], id=str(i), on_press=self.toggle))
             self.add_widget(self.lightsValue[i])
+
+    def update_rect(self, instance, value):
+        instance.rect.pos = instance.pos
+        instance.rect.size = instance.size
+
+    def toggle(self, positionID):
+        id_ = positionID.toggled
+
+        self.game.flip(id_)
+        self.game.ones += 1 if self.game.config[id_] else -1
+
+        if id_ > 4:      self.flip(id_ - 5)
+        if id_ < 20:     self.flip(id_ + 5)
+        if id_ % 5 > 0:  self.flip(id_ - 1)
+        if id_ % 5 < 4:  self.flip(id_ + 1)
+
+    def flip(self, id_):
+        self.lightsValue[id_].flip()
+        self.game.flip(id_)
+        self.game.ones += 1 if self.game.config[id_] else -1
