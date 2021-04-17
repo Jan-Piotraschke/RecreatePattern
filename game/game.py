@@ -56,6 +56,7 @@ class Light(Button):
         super(Light, self).__init__(**kwargs)
         
         self.toggled = 0
+        self.id = id
         self.initialize(waveLength)
 
     def initialize(self, waveLength):
@@ -129,18 +130,20 @@ class GameGrid(GridLayout):
         instance.rect.pos = instance.pos
         instance.rect.size = instance.size
 
-    def toggle(self, positionID):
-        id_ = positionID.toggled
+    def toggle(self, lights):
 
-        self.game.flip(id_)
-        self.game.ones += 1 if self.game.config[id_] else -1
+        positionID = int(lights.id)
 
-        if id_ > 4:      self.flip(id_ - 5)
-        if id_ < 20:     self.flip(id_ + 5)
-        if id_ % 5 > 0:  self.flip(id_ - 1)
-        if id_ % 5 < 4:  self.flip(id_ + 1)
+        self.flip(positionID)
+        self.game.ones += 1 if self.game.config[positionID] else -1
 
-    def flip(self, id_):
-        self.lightsValue[id_].flip()
-        self.game.flip(id_)
-        self.game.ones += 1 if self.game.config[id_] else -1
+        if positionID > 4:      self.flip(positionID - 5)
+        if positionID < 20:     self.flip(positionID + 5)
+        if positionID % 5 > 0:  self.flip(positionID - 1)
+        if positionID % 5 < 4:  self.flip(positionID + 1)
+
+    def flip(self, positionID):
+
+        self.lightsValue[positionID].flip()
+        self.game.flip(positionID)
+        self.game.ones += 1 if self.game.config[positionID] else -1
