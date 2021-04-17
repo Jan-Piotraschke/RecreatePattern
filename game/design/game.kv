@@ -1,0 +1,19 @@
+<GameScreen>:
+    on_release: app.game.GameGrid(size_hint_min_y=620)
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        Button:
+            pos_hint: {'center_x': 0.5}
+            text: 'Back to menu'
+            on_press: root.back()
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_max_y: 40
+        Button:
+            text: "Back to menu"
+            on_press: root.back()
+
+
