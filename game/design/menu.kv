@@ -1,0 +1,23 @@
+<MenuScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        size: root.width, root.height
+
+        padding: (200, 100, 200, 150)
+        spacing: 12
+
+        Image:
+            source: 'img/pattern_logo.png'
+
+        Label:
+            pos_hint: {'center_x': 0.5}
+            text: 'Lights On (Advanced)'
+            font_size: '80'
+
+        Button:
+            pos_hint: {'center_x': 0.5}
+            size_hint_max: (300, 100)
+            size_hint_x: 0.5
+            text: 'New Game'
+            on_press: root.new_game()
+            font_size: "40"
