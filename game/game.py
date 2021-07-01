@@ -19,7 +19,7 @@ from kivy.lang import Builder
 # our .kv design file 
 # Builder.load_file('design/game.kv')
 
-lightOut = os.path.join("img", "orange.png")
+lightOut = os.path.join("img", "blue.png")
 lightNormal = os.path.join("img", "red.png")
 
 
