@@ -26,11 +26,15 @@ GAME_COLS: int = 5
 GAME_ROWS: int = 5
 
 
+def dot(x1, x2):
+    return sum(map(operator.mul, x1, x2))
+
+
 class GameScreen(Screen):
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
 
-        self.game = GameGrid(size_hint_min_y=620)
+        self.game = GameGridBroker(size_hint_min_y=620)
 
         # create the play ground for the game
         playGround = BoxLayout(orientation="vertical")
@@ -58,10 +62,78 @@ class GameScreen(Screen):
         self.parent.current = "menu"
 
 
-# in this class we define the visualization logic at which time the light is off or on
-class Light(Button):
+class GameGridBroker(GridLayout):
+    """ this class coordinates the user input and the corresponding Game output """
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        self.cols = GAME_COLS  # ! important to know: 'self.cols' is mandatory for 'GridLayout'
+        self.spacing = 5  # the space between the fields
+
+        self.game = Game()  # inject the Game into the Grid
+        self.game.load()  # start the Game
+
+        self.light_properties_list: list = []
+        for i in range(GAME_COLS * GAME_ROWS):
+            light_properties = LightProperties(self.game.config[i], id=str(i), on_press=self.stimulusArea)
+            self.light_properties_list.append(light_properties)  # store the properties for changing it later on
+            self.add_widget(light_properties)  # give the light properties to the corresponding game tile
+
+
+    def stimulusArea(self, light_selected):
+        """ give a stimulus to the chosen area
+
+        :param light_selected:
+        :return:
+        """
+        position_ID = int(light_selected.id)  # defined in LightProperties
+
+        stimulus_area_list: list = []
+        stimulus_area_list.append(position_ID)
+        # Todo: generalize this logic
+        if position_ID > 4:
+            stimulus_area_list.append(position_ID - 5)
+        if position_ID < 20:
+            stimulus_area_list.append(position_ID + 5)
+        if position_ID % 5 > 0:
+            stimulus_area_list.append(position_ID - 1)
+        if position_ID % 5 < 4:
+            stimulus_area_list.append(position_ID + 1)
+
+        self.broker_order(stimulus_area_list)
+
+
+    def broker_order(self, stimulus_area_list):
+        """ this function implements the order from the broker to the logic of the game
+
+        :param stimulus_area_list:
+        :return:
+        """
+        for position_ID in stimulus_area_list:
+            self.light_properties_list[position_ID].changeWavelength()
+
+
+# the mathematical flipping logic and the initialization of a game
+class Game:
+    def __init__(self):
+        self.config = []
+
+    def generateRandomGame(self, game_tiles_number):
+        return [random.randint(0, 1) for _ in range(game_tiles_number)]
+
+    def load(self):
+        game_tiles = GAME_COLS * GAME_ROWS
+        x1 = [0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0]
+        x2 = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1]
+        self.config = self.generateRandomGame(game_tiles)
+        while dot(self.config, x1) % 2 or dot(self.config, x2) % 2:
+            self.config = self.generateRandomGame(game_tiles)
+
+
+class LightProperties(Button):
+    # in this class we define the visualization logic at which time the light is off or on
     def __init__(self, waveLength, id, **kwargs):
-        super(Light, self).__init__(**kwargs)
+        super(LightProperties, self).__init__(**kwargs)
         
         self.toggled = 0
         self.id = id
@@ -79,89 +151,5 @@ class Light(Button):
 
     # ! function is broken
     def changeWavelength(self):
-        self.toggled = 0 if self.toggled else 1
-        self.background_normal, self.background_down = self.background_down, self.background_normal
-
-
-def dot(x1, x2):
-    return sum(map(operator.mul, x1, x2))
-
-# the mathematical flipping logic and the initialization of a game
-class Game:
-    def __init__(self, cols, rows):
-        self.config = []
-        self.ones = 0
-        self.cols = cols
-        self.rows = rows
-
-    def generateRandomGame(self, game_tiles_number):
-        return [random.randint(0, 1) for _ in range(game_tiles_number)]
-
-    def load(self):
-        game_tiles = self.cols * self.rows
-        x1 = [0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0]
-        x2 = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1]
-        self.config = self.generateRandomGame(game_tiles)
-        while dot(self.config, x1) % 2 or dot(self.config, x2) % 2:
-            self.config = self.generateRandomGame(game_tiles)
-
-        self.ones = sum(self.config)
-
-    # NOTE: the flipping logic -> has to be more complex for an advanced 'Light On'!
-    def flip(self, position):
-        self.config[position] = 0 if self.config[position] else 1
-
-class GameGrid(GridLayout):
-    def __init__(self, **kwargs):
-        super().__init__()
-
-        # ! important to know: 'self.cols' is mandatory for 'GridLayout'
-        self.cols = GAME_COLS
-        # the space between the fields
-        self.spacing = 5
-
-        self.game = Game(cols=self.cols, rows=GAME_ROWS)
-        # self.manager = None
-        # self.player_name = None
-        # self.scheduled = None
-
-        with self.canvas.before:
-            Color(0.75, 0.75, 0.75, 0.75)
-            self.rect = Rectangle(size=self.size, pos=self.pos)
-        self.bind(pos=self.update_rect, size=self.update_rect)
-
-        self.game.load()
-
-        self.lightsValue = []
-        for i in range(GAME_COLS*GAME_ROWS):
-            
-            # overgive the value of the lights (on vs off) to the visualization logic class
-            self.lightsValue.append(Light(self.game.config[i], id=str(i), on_press=self.stimulusArea))
-            self.add_widget(self.lightsValue[i])
-
-    def update_rect(self, instance, value):
-        instance.rect.pos = instance.pos
-        instance.rect.size = instance.size
-
-    def stimulusArea(self, lights):
-        """ give a stimulus to the chosen area
-
-        :param lights:
-        :return:
-        """
-
-        position_ID = int(lights.id)
-
-        self.flip(position_ID)
-        self.game.ones += 1 if self.game.config[position_ID] else -1
-
-        if position_ID > 4:      self.flip(position_ID - 5)
-        if position_ID < 20:     self.flip(position_ID + 5)
-        if position_ID % 5 > 0:  self.flip(position_ID - 1)
-        if position_ID % 5 < 4:  self.flip(position_ID + 1)
-
-    def flip(self, position_ID):
-
-        self.lightsValue[position_ID].changeWavelength()
-        self.game.flip(position_ID)
-        self.game.ones += 1 if self.game.config[position_ID] else -1
+        self.toggled = 0 if self.toggled else 1  # binary switch
+        self.background_normal, self.background_down = self.background_down, self.background_normal   # binary switch
