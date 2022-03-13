@@ -1,6 +1,7 @@
 import os
 import operator
 import random
+import numpy as np
 
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -72,15 +73,48 @@ class GameGridBroker(GridLayout):
 
         self.game = Game()  # inject the Game into the Grid
         self.game.load()  # start the Game
+        self.neighbors = self.find_neighbours(arr=np.arange(GAME_COLS*GAME_ROWS).reshape((GAME_ROWS, GAME_COLS)))
 
         self.light_properties_list: list = []
         for i in range(GAME_COLS * GAME_ROWS):
-            light_properties = LightProperties(self.game.config[i], id=str(i), on_press=self.stimulusArea)
+            light_properties = LightProperties(self.game.config[i], id=str(i), on_press=self.stimulus_area)
             self.light_properties_list.append(light_properties)  # store the properties for changing it later on
             self.add_widget(light_properties)  # give the light properties to the corresponding game tile
 
+    @staticmethod
+    def find_neighbours(arr):
 
-    def stimulusArea(self, light_selected):
+        neighbors = {}
+
+        for i in range(len(arr)):
+            for j, value in enumerate(arr[i]):
+
+                if i == 0 or i == len(arr) - 1 or j == 0 or j == len(arr[i]) - 1:
+                    # corners
+                    new_neighbors = []
+                    if i != 0:
+                        new_neighbors.append(arr[i - 1][j])  # top neighbor
+                    if j != len(arr[i]) - 1:
+                        new_neighbors.append(arr[i][j + 1])  # right neighbor
+                    if i != len(arr) - 1:
+                        new_neighbors.append(arr[i + 1][j])  # bottom neighbor
+                    if j != 0:
+                        new_neighbors.append(arr[i][j - 1])  # left neighbor
+
+                else:
+                    # add neighbors
+                    new_neighbors = [
+                        arr[i - 1][j],  # top neighbor
+                        arr[i][j + 1],  # right neighbor
+                        arr[i + 1][j],  # bottom neighbor
+                        arr[i][j - 1]  # left neighbor
+                    ]
+
+                neighbors[value] = new_neighbors
+
+        return neighbors
+
+    def stimulus_area(self, light_selected):
         """ give a stimulus to the chosen area
 
         :param light_selected:
@@ -90,18 +124,9 @@ class GameGridBroker(GridLayout):
 
         stimulus_area_list: list = []
         stimulus_area_list.append(position_ID)
-        # Todo: generalize this logic
-        if position_ID > 4:
-            stimulus_area_list.append(position_ID - 5)
-        if position_ID < 20:
-            stimulus_area_list.append(position_ID + 5)
-        if position_ID % 5 > 0:
-            stimulus_area_list.append(position_ID - 1)
-        if position_ID % 5 < 4:
-            stimulus_area_list.append(position_ID + 1)
+        stimulus_area_list.extend(self.neighbors[position_ID])  # append the neighbors
 
         self.broker_order(stimulus_area_list)
-
 
     def broker_order(self, stimulus_area_list):
         """ this function implements the order from the broker to the logic of the game
@@ -110,7 +135,7 @@ class GameGridBroker(GridLayout):
         :return:
         """
         for position_ID in stimulus_area_list:
-            self.light_properties_list[position_ID].changeWavelength()
+            self.light_properties_list[position_ID].change_wavelength()
 
 
 # the mathematical flipping logic and the initialization of a game
@@ -118,29 +143,30 @@ class Game:
     def __init__(self):
         self.config = []
 
-    def generateRandomGame(self, game_tiles_number):
+    @staticmethod
+    def generate_random_game(game_tiles_number):
         return [random.randint(0, 1) for _ in range(game_tiles_number)]
 
     def load(self):
         game_tiles = GAME_COLS * GAME_ROWS
         x1 = [0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0]
         x2 = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1]
-        self.config = self.generateRandomGame(game_tiles)
+        self.config = self.generate_random_game(game_tiles)
         while dot(self.config, x1) % 2 or dot(self.config, x2) % 2:
-            self.config = self.generateRandomGame(game_tiles)
+            self.config = self.generate_random_game(game_tiles)
 
 
 class LightProperties(Button):
     # in this class we define the visualization logic at which time the light is off or on
-    def __init__(self, waveLength, id, **kwargs):
+    def __init__(self, wavelength, id, **kwargs):
         super(LightProperties, self).__init__(**kwargs)
         
         self.toggled = 0
         self.id = id
-        self.initialize(waveLength)
+        self.initialize(wavelength)
 
-    def initialize(self, waveLength):
-        if waveLength == 1:
+    def initialize(self, wavelength):
+        if wavelength == 1:
             self.toggled = 1
             self.background_down = lightOut
             self.background_normal = lightNormal
@@ -150,6 +176,6 @@ class LightProperties(Button):
             self.background_normal = lightOut
 
     # ! function is broken
-    def changeWavelength(self):
+    def change_wavelength(self):
         self.toggled = 0 if self.toggled else 1  # binary switch
-        self.background_normal, self.background_down = self.background_down, self.background_normal   # binary switch
+        self.background_normal, self.background_down = self.background_down, self.background_normal  # binary switch
