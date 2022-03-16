@@ -1,4 +1,3 @@
-# TODO: dynamische Farbgenerierung der Spielfelder
 # TODO: 3 verschiedene Farben der Kackeln
 
 
@@ -165,12 +164,11 @@ class LightProperties(Widget):
     # in this class we define the visualization logic at which time the light is off or on
     def __init__(self, wavelength, id, **kwargs):
         super(LightProperties, self).__init__(**kwargs)
-
         self.toggled = 0
         self.id = id
-        #self.initialize(wavelength)
-        self.r = 0
+        self.initialize(wavelength)
 
+    # switch the light
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
             if self.r == 1.0:
@@ -178,18 +176,10 @@ class LightProperties(Widget):
             else:
                 self.r += 1
 
-    # def initialize(self, wavelength):
-    #     if wavelength == 1:
-    #         self.toggled = 1
-    #         self.background_down = MyWidget()
-    #         self.background_normal = MyWidget()
-    #     else:
-    #         self.toggled = 0
-    #         self.background_down = MyWidget()
-    #         self.background_normal = MyWidget()
-    #     self.add_widget(self.background_down, self.background_normal)
-    #
-    # # ! function is broken
-    # def change_wavelength(self):
-    #     self.toggled = 0 if self.toggled else 1  # binary switch
-    #     self.background_normal, self.background_down = self.background_down, self.background_normal  # binary switch
+    def initialize(self, wavelength):
+        if wavelength == 1:
+            self.toggled = 1
+            self.r = 0
+        else:
+            self.toggled = 0
+            self.r = 1
