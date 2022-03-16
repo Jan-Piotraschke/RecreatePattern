@@ -1,11 +1,14 @@
+# TODO: dynamische Farbgenerierung der Spielfelder
+# TODO: 3 verschiedene Farben der Kackeln
+
+
 import os
 import operator
 import random
 import numpy as np
 
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-
+from kivy.uix.widget import Widget
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
@@ -14,14 +17,13 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen
 from kivy.graphics import Color, Rectangle
 from kivy.uix.gridlayout import GridLayout
+from kivy.properties import NumericProperty
 
 from kivy.lang import Builder
 
 # our .kv design file 
-# Builder.load_file('design/game.kv')
+Builder.load_file('design/game.kv')
 
-lightOut = os.path.join("img", "blue.png")
-lightNormal = os.path.join("img", "red.png")
 
 GAME_COLS: int = 5
 GAME_ROWS: int = 5
@@ -155,27 +157,39 @@ class Game:
         while dot(self.config, x1) % 2 or dot(self.config, x2) % 2:
             self.config = self.generate_random_game(game_tiles)
 
-
-class LightProperties(Button):
+# NOTE: General rule for programming in Kivy:
+# if you want to change code depending on a property of a Widget/Object use a Kivy Property (like NumericProperty)
+class LightProperties(Widget):
+    # Easily manipulate widgets defined in the Kv language
+    r = NumericProperty(0)  # make the property of this object variable
     # in this class we define the visualization logic at which time the light is off or on
     def __init__(self, wavelength, id, **kwargs):
         super(LightProperties, self).__init__(**kwargs)
-        
+
         self.toggled = 0
         self.id = id
-        self.initialize(wavelength)
+        #self.initialize(wavelength)
+        self.r = 0
 
-    def initialize(self, wavelength):
-        if wavelength == 1:
-            self.toggled = 1
-            self.background_down = lightOut
-            self.background_normal = lightNormal
-        else:
-            self.toggled = 0
-            self.background_down = lightNormal
-            self.background_normal = lightOut
+    def on_touch_down(self, touch):
+        if self.collide_point(touch.x, touch.y):
+            if self.r == 1.0:
+                self.r -= 1
+            else:
+                self.r += 1
 
-    # ! function is broken
-    def change_wavelength(self):
-        self.toggled = 0 if self.toggled else 1  # binary switch
-        self.background_normal, self.background_down = self.background_down, self.background_normal  # binary switch
+    # def initialize(self, wavelength):
+    #     if wavelength == 1:
+    #         self.toggled = 1
+    #         self.background_down = MyWidget()
+    #         self.background_normal = MyWidget()
+    #     else:
+    #         self.toggled = 0
+    #         self.background_down = MyWidget()
+    #         self.background_normal = MyWidget()
+    #     self.add_widget(self.background_down, self.background_normal)
+    #
+    # # ! function is broken
+    # def change_wavelength(self):
+    #     self.toggled = 0 if self.toggled else 1  # binary switch
+    #     self.background_normal, self.background_down = self.background_down, self.background_normal  # binary switch
