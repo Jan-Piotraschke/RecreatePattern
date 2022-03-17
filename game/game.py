@@ -11,13 +11,12 @@ from kivy.uix.widget import Widget
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.button import Button
+from kivy.uix.button import Button, ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen
 from kivy.graphics import Color, Rectangle
 from kivy.uix.gridlayout import GridLayout
 from kivy.properties import NumericProperty
-
 from kivy.lang import Builder
 
 # our .kv design file 
@@ -156,25 +155,19 @@ class Game:
         while dot(self.config, x1) % 2 or dot(self.config, x2) % 2:
             self.config = self.generate_random_game(game_tiles)
 
+
 # NOTE: General rule for programming in Kivy:
 # if you want to change code depending on a property of a Widget/Object use a Kivy Property (like NumericProperty)
-class LightProperties(Widget):
+class LightProperties(ButtonBehavior, Label):
     # Easily manipulate widgets defined in the Kv language
     r = NumericProperty(0)  # make the property of this object variable
+
     # in this class we define the visualization logic at which time the light is off or on
     def __init__(self, wavelength, id, **kwargs):
         super(LightProperties, self).__init__(**kwargs)
         self.toggled = 0
         self.id = id
         self.initialize(wavelength)
-
-    # switch the light
-    def on_touch_down(self, touch):
-        if self.collide_point(touch.x, touch.y):
-            if self.r == 1.0:
-                self.r -= 1
-            else:
-                self.r += 1
 
     def initialize(self, wavelength):
         if wavelength == 1:
@@ -183,3 +176,10 @@ class LightProperties(Widget):
         else:
             self.toggled = 0
             self.r = 1
+
+    # switch the light
+    def change_wavelength(self):
+        if self.r == 1.0:
+            self.r -= 1
+        else:
+            self.r += 1
