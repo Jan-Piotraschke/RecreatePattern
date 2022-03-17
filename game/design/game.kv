@@ -1,19 +1,33 @@
-<GameScreen>:
-    on_release: app.game.GameGrid(size_hint_min_y=620)
+<LightProperties>:
+    # The Canvas is the root object used for DRAWING
+    canvas:
+        Color:
+            rgba: self.r, .3, .4, .95
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
-    BoxLayout:
-        orientation: 'vertical'
+    # Print a text to the console
+    on_release:
+        print("Sehr gut")
 
-        Button:
-            pos_hint: {'center_x': 0.5}
-            text: 'Back to menu'
-            on_press: root.back()
 
-    BoxLayout:
-        orientation: 'horizontal'
-        size_hint_max_y: 40
-        Button:
-            text: "Back to menu"
-            on_press: root.back()
+#<GameScreen>:
+ #   on_release: app.game.GameGrid(size_hint_min_y=620)
+
+  #  BoxLayout:
+   #     orientation: 'vertical'
+
+    #    Button:
+     #       pos_hint: {'center_x': 0.5}
+      #      text: 'Back to menu'
+       #     on_press: root.back()
+
+    #BoxLayout:
+     #   orientation: 'horizontal'
+      #  size_hint_max_y: 40
+       # Button:
+        #    text: "Back to menu"
+         #   on_press: root.back()
 
 
